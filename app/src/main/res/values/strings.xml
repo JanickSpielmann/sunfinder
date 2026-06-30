@@ -1,3 +1,13 @@
 <resources>
     <string name="app_name">SunFinder</string>
+    <string name="status_searching">Standort wird gesucht…</string>
+    <string name="status_loading">Standort wird geladen…</string>
+    <string name="status_denied">Standort-Zugriff verweigert. Bitte in Einstellungen aktivieren.</string>
+    <string name="status_error">Standortfehler: %s</string>
+    <string name="rec_sunset">Sonne ist untergegangen\nKein Schatten nötig</string>
+    <string name="rec_left">Links setzen für Schatten</string>
+    <string name="rec_right">Rechts setzen für Schatten</string>
+    <string name="rec_front_back">Sonne von vorne oder hinten\n– Beliebige Seite</string>
+    <string name="details_with_location">Sonne: %1$s (%2$.0f°) | %3$.0f° über Horizont</string>
+    <string name="details_default_location">Sonne: %1$s (%2$.0f°) | %3$.0f° über Horizont | Standardstandort</string>
 </resources>

@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
-        android:text="Standort wird gesucht…"
+        android:text="@string/status_searching"
         android:textColor="#85C1E9"
         android:textSize="13sp" />
 
@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:layout_marginBottom="6dp"
         android:gravity="center"
-        android:text="Standort wird geladen…"
+        android:text="@string/status_loading"
         android:textColor="#F4D03F"
         android:textSize="22sp"
         android:textStyle="bold" />
@@ -38,7 +38,7 @@
         android:id="@+id/tvDetails"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="20dp"
+        android:layout_marginBottom="70dp"
         android:gravity="center"
         android:text=""
         android:textColor="#85C1E9"

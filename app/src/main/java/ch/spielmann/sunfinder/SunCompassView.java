@@ -1,6 +1,7 @@
 package ch.spielmann.sunfinder;
 
 import android.content.Context;
+import androidx.annotation.NonNull;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.DashPathEffect;
@@ -122,7 +123,7 @@ public class SunCompassView extends View {
     public enum ShadeSide {LEFT, RIGHT, NEITHER}
 
     @Override
-    protected void onDraw(Canvas canvas) {
+    protected void onDraw(@NonNull Canvas canvas) {
         super.onDraw(canvas);
 
         float cx = getWidth() / 2f;
@@ -309,6 +310,11 @@ public class SunCompassView extends View {
     private void drawGroundShadow(Canvas canvas, float cx, float cy, float halfLen, float halfW, float radius) {
         double relAngle = getRelativeAzimuth();
 
+        canvas.save();
+        Path circlePath = new Path();
+        circlePath.addCircle(cx, cy, radius, Path.Direction.CW);
+        canvas.clipPath(circlePath);
+
         // Sun direction vector in canvas coords (Y-axis points down)
         float sunAngleRad = (float) Math.toRadians(relAngle - 90);
         float sunDx = (float) Math.cos(sunAngleRad);
@@ -319,7 +325,6 @@ public class SunCompassView extends View {
 
         // Perpendicular to sun direction → projects corners to find silhouette extremes
         float perpDx = -sunDy;
-        float perpDy = sunDx;
 
         float[][] corners = {
             {cx - halfW, cy - halfLen},  // TL
@@ -331,7 +336,7 @@ public class SunCompassView extends View {
         float maxP = Float.NEGATIVE_INFINITY, minP = Float.POSITIVE_INFINITY;
         int maxIdx = 0, minIdx = 0;
         for (int i = 0; i < 4; i++) {
-            float p = (corners[i][0] - cx) * perpDx + (corners[i][1] - cy) * perpDy;
+            float p = (corners[i][0] - cx) * perpDx + (corners[i][1] - cy) * sunDx;
             if (p > maxP) { maxP = p; maxIdx = i; }
             if (p < minP) { minP = p; minIdx = i; }
         }
@@ -350,5 +355,7 @@ public class SunCompassView extends View {
         groundShadow.setColor(Color.parseColor("#60000000"));
         groundShadow.setStyle(Paint.Style.FILL);
         canvas.drawPath(shadowPath, groundShadow);
+
+        canvas.restore();
     }
 }

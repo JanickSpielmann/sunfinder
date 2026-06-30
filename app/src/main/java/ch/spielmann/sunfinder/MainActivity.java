@@ -1,6 +1,7 @@
 package ch.spielmann.sunfinder;
 
 import android.Manifest;
+import java.util.Locale;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -51,7 +52,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 if (granted) {
                     startLocationUpdates();
                 } else {
-                    tvStatus.setText("Standort-Zugriff verweigert. Bitte in Einstellungen aktivieren.");
+                    tvStatus.setText(R.string.status_denied);
                 }
             });
 
@@ -108,7 +109,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
                 tvStatus.setVisibility(View.GONE);
             }
         } catch (SecurityException e) {
-            tvStatus.setText("Standortfehler: " + e.getMessage());
+            tvStatus.setText(getString(R.string.status_error, e.getMessage()));
         }
     }
 
@@ -136,26 +137,28 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         String cardinal = azimuthToCardinal(currentSunAzimuth);
 
         if (currentSunElevation <= 0) {
-            tvRecommendation.setText("Sonne ist untergegangen\nKein Schatten nötig");
+            tvRecommendation.setText(R.string.rec_sunset);
         } else {
             switch (side) {
                 case LEFT:
-                    tvRecommendation.setText("Links setzen für Schatten");
+                    tvRecommendation.setText(R.string.rec_left);
                     break;
                 case RIGHT:
-                    tvRecommendation.setText("Rechts setzen für Schatten");
+                    tvRecommendation.setText(R.string.rec_right);
                     break;
                 default:
-                    tvRecommendation.setText("Sonne von vorne oder hinten\n– Beliebige Seite");
+                    tvRecommendation.setText(R.string.rec_front_back);
                     break;
             }
         }
 
         if (!hasLocation) {
-            tvDetails.setText(String.format("Sonne: %s (%.0f°) | %.0f° über Horizont | Standardstandort",
+            tvDetails.setText(String.format(Locale.getDefault(),
+                    getString(R.string.details_default_location),
                     cardinal, currentSunAzimuth, currentSunElevation));
         } else {
-            tvDetails.setText(String.format("Sonne: %s (%.0f°) | %.0f° über Horizont",
+            tvDetails.setText(String.format(Locale.getDefault(),
+                    getString(R.string.details_with_location),
                     cardinal, currentSunAzimuth, currentSunElevation));
         }
     }
@@ -208,8 +211,11 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         double azimuthDeg = Math.toDegrees(orientation[0]);
         if (azimuthDeg < 0) azimuthDeg += 360;
 
-        // Low-pass filter to smooth compass jitter
-        compassHeading = compassHeading * 0.85 + azimuthDeg * 0.15;
+        // Low-pass filter — use shortest angular path to avoid 0°/360° wrap jump
+        double delta = azimuthDeg - compassHeading;
+        if (delta > 180) delta -= 360;
+        else if (delta < -180) delta += 360;
+        compassHeading = (compassHeading + 0.15 * delta + 360) % 360;
         compassView.setVehicleHeading(compassHeading);
 
         // Update recommendation text at most 5 times per second
