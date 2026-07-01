@@ -1,4 +1,4 @@
-package ch.spielmann.sunfinder;
+package it.spielmann.sunfinder;
 
 import android.content.Context;
 
@@ -21,6 +21,6 @@ public class ExampleInstrumentedTest {
     public void useAppContext() {
         // Context of the app under test.
         Context appContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        assertEquals("ch.spielmann.sunfinder", appContext.getPackageName());
+        assertEquals("it.spielmann.sunfinder", appContext.getPackageName());
     }
 }

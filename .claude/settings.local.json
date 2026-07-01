@@ -5,7 +5,12 @@
       "mcp__visualize__show_widget",
       "PowerShell(Get-ChildItem \"C:\\\\Program Files\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"Android|Java|JDK|Eclipse|Adoptium\" } | Select-Object Name)",
       "PowerShell($studioPath = Get-ChildItem \"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\" -ErrorAction SilentlyContinue | Where-Object { $_.Name -match \"Android\" }; $studioPath; Get-ChildItem \"C:\\\\Program Files\\\\Android Studio\" -ErrorAction SilentlyContinue | Select-Object Name)",
-      "PowerShell($env:JAVA_HOME = \"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\"; cd P:\\\\SunFinder; .\\\\gradlew assembleDebug 2>&1 | Select-Object -Last 50)"
+      "PowerShell($env:JAVA_HOME = \"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\"; cd P:\\\\SunFinder; .\\\\gradlew assembleDebug 2>&1 | Select-Object -Last 50)",
+      "Bash(git mv *)",
+      "Bash(rmdir app/src/main/java/ch/spielmann/sunfinder app/src/main/java/ch/spielmann app/src/main/java/ch)",
+      "Bash(rmdir app/src/test/java/ch/spielmann/sunfinder app/src/test/java/ch/spielmann app/src/test/java/ch)",
+      "Bash(rmdir app/src/androidTest/java/ch/spielmann/sunfinder app/src/androidTest/java/ch/spielmann app/src/androidTest/java/ch)",
+      "Bash(JAVA_HOME=\"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\" ./gradlew.bat assembleDebug --console=plain)"
     ]
   }
 }

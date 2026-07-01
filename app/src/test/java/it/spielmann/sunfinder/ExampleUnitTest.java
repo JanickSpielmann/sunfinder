@@ -1,4 +1,4 @@
-package ch.spielmann.sunfinder;
+package it.spielmann.sunfinder;
 
 import org.junit.Test;
 

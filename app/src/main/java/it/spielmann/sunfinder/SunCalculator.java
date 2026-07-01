@@ -1,4 +1,4 @@
-package ch.spielmann.sunfinder;
+package it.spielmann.sunfinder;
 
 public class SunCalculator {
 
