@@ -10,7 +10,26 @@
       "Bash(rmdir app/src/main/java/ch/spielmann/sunfinder app/src/main/java/ch/spielmann app/src/main/java/ch)",
       "Bash(rmdir app/src/test/java/ch/spielmann/sunfinder app/src/test/java/ch/spielmann app/src/test/java/ch)",
       "Bash(rmdir app/src/androidTest/java/ch/spielmann/sunfinder app/src/androidTest/java/ch/spielmann app/src/androidTest/java/ch)",
-      "Bash(JAVA_HOME=\"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\" ./gradlew.bat assembleDebug --console=plain)"
+      "Bash(JAVA_HOME=\"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\" ./gradlew.bat assembleDebug --console=plain)",
+      "Bash(find . -iname \"*sun_icon*\" -not -path \"*/build/*\")",
+      "Bash(git log *)",
+      "Bash(ls -la sun_icon.png)",
+      "Bash(python3 -c \"from PIL import Image; im=Image.open\\('sun_icon.png'\\); print\\(im.size, im.mode\\)\")",
+      "Bash(file sun_icon.png)",
+      "Bash(identify sun_icon.png)",
+      "Bash(python3 -c ' *)",
+      "Bash(magick -version)",
+      "Bash(export JAVA_HOME=\"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\")",
+      "Bash('C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr/bin/jshell' -q 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\inspect.jsh')",
+      "Bash('/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/jshell.exe' -q 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\inspect.jsh')",
+      "Bash(ls \"/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/\" | grep -i -E \"jshell|java|javac\")",
+      "Bash('/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/java.exe' 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\IconInspect.java')",
+      "Bash('/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/java.exe' 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\IconGen.java')",
+      "Bash(rm app/src/main/res/drawable/ic_launcher_background.xml app/src/main/res/drawable/ic_launcher_foreground.xml)",
+      "Bash(rmdir app/src/main/res/drawable)",
+      "Bash('/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/java.exe' 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\MonoGen.java')",
+      "Bash('/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/java.exe' 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\SunGlyph.java')",
+      "Bash(JAVA_HOME=\"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\" ./gradlew.bat assembleDebug lintDebug --console=plain)"
     ]
   }
 }
