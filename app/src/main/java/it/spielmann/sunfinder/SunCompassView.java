@@ -17,12 +17,21 @@ public class SunCompassView extends View {
     private double sunElevation = 45;
     private double vehicleHeading = 0;
 
+    private double moonAzimuth = 135;
+    private double moonElevation = -45;
+    private double moonIlluminatedFraction = 0.5;
+    private double moonWaxing = 1;
+
     private final Paint bgPaint = new Paint();
     private final Paint ringPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint tickPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint sunPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint sunGlowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint sunLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint moonLitPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint moonShadowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint moonGlowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
+    private final Paint moonLinePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint vehiclePaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint vehicleBorderPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private final Paint windowPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
@@ -70,6 +79,19 @@ public class SunCompassView extends View {
         sunLinePaint.setStyle(Paint.Style.STROKE);
         sunLinePaint.setPathEffect(new DashPathEffect(new float[]{12, 8}, 0));
 
+        moonLitPaint.setColor(Color.parseColor("#ECEFF4"));
+        moonLitPaint.setStyle(Paint.Style.FILL);
+
+        moonShadowPaint.setColor(Color.parseColor("#1B2631"));
+        moonShadowPaint.setStyle(Paint.Style.FILL);
+
+        moonGlowPaint.setColor(Color.parseColor("#30ECEFF4"));
+        moonGlowPaint.setStyle(Paint.Style.FILL);
+
+        moonLinePaint.setColor(Color.parseColor("#60ECEFF4"));
+        moonLinePaint.setStyle(Paint.Style.STROKE);
+        moonLinePaint.setPathEffect(new DashPathEffect(new float[]{12, 8}, 0));
+
         vehiclePaint.setColor(Color.parseColor("#85C1E9"));
         vehiclePaint.setStyle(Paint.Style.FILL);
 
@@ -107,9 +129,30 @@ public class SunCompassView extends View {
         invalidate();
     }
 
-    // Sun azimuth relative to vehicle heading (0 = in front, 90 = right, 180 = behind, 270 = left)
+    public void setMoonPosition(double azimuth, double elevation, double illuminatedFraction, double waxing) {
+        this.moonAzimuth = azimuth;
+        this.moonElevation = elevation;
+        this.moonIlluminatedFraction = illuminatedFraction;
+        this.moonWaxing = waxing;
+        invalidate();
+    }
+
+    // At night the sun is below the horizon — show the moon instead
+    private boolean isNight() {
+        return sunElevation <= 0;
+    }
+
+    private double activeAzimuth() {
+        return isNight() ? moonAzimuth : sunAzimuth;
+    }
+
+    private double activeElevation() {
+        return isNight() ? moonElevation : sunElevation;
+    }
+
+    // Active body's azimuth relative to vehicle heading (0 = in front, 90 = right, 180 = behind, 270 = left)
     private double getRelativeAzimuth() {
-        return (sunAzimuth - vehicleHeading + 360) % 360;
+        return (activeAzimuth() - vehicleHeading + 360) % 360;
     }
 
     public ShadeSide getShadeSide() {
@@ -130,12 +173,18 @@ public class SunCompassView extends View {
         float cy = getHeight() / 2f;
         float radius = Math.min(cx, cy) * 0.82f;
 
+        boolean night = isNight();
+
         drawBackground(canvas, cx, cy, radius);
         drawCompassRing(canvas, cx, cy, radius);
-        drawSunLine(canvas, cx, cy, radius);
+        drawBodyLine(canvas, cx, cy, radius, night);
         drawGroundShadow(canvas, cx, cy, radius * 0.28f, radius * 0.16f, radius);
         drawVehicle(canvas, cx, cy, radius * 0.28f, radius * 0.16f);
-        drawSun(canvas, cx, cy, radius);
+        if (night) {
+            drawMoon(canvas, cx, cy, radius);
+        } else {
+            drawSun(canvas, cx, cy, radius);
+        }
     }
 
     private void drawBackground(Canvas canvas, float cx, float cy, float radius) {
@@ -191,10 +240,11 @@ public class SunCompassView extends View {
         canvas.drawText("L", cx - labelRadius, cy + textOffset, labelPaint);
     }
 
-    private void drawSunLine(Canvas canvas, float cx, float cy, float radius) {
+    private void drawBodyLine(Canvas canvas, float cx, float cy, float radius, boolean night) {
         float[] pos = getSunXY(cx, cy, radius);
-        sunLinePaint.setStrokeWidth(2f);
-        canvas.drawLine(cx, cy, pos[0], pos[1], sunLinePaint);
+        Paint linePaint = night ? moonLinePaint : sunLinePaint;
+        linePaint.setStrokeWidth(2f);
+        canvas.drawLine(cx, cy, pos[0], pos[1], linePaint);
     }
 
     private void drawSun(Canvas canvas, float cx, float cy, float radius) {
@@ -220,11 +270,31 @@ public class SunCompassView extends View {
         }
     }
 
-    // Sun position uses relative azimuth so the bus stays fixed and sun rotates
+    private void drawMoon(Canvas canvas, float cx, float cy, float radius) {
+        float[] pos = getSunXY(cx, cy, radius);
+        float mx = pos[0], my = pos[1];
+        float moonR = radius * 0.09f;
+
+        canvas.drawCircle(mx, my, moonR * 1.8f, moonGlowPaint);
+
+        // Two-circle overlap trick: shadow disc slides across the lit disc to render the phase
+        canvas.save();
+        Path clip = new Path();
+        clip.addCircle(mx, my, moonR, Path.Direction.CW);
+        canvas.clipPath(clip);
+        canvas.drawCircle(mx, my, moonR, moonLitPaint);
+
+        float offset = (float) (2 * moonR * moonIlluminatedFraction);
+        float shadowCx = moonWaxing > 0 ? mx - offset : mx + offset;
+        canvas.drawCircle(shadowCx, my, moonR, moonShadowPaint);
+        canvas.restore();
+    }
+
+    // Body position uses relative azimuth so the bus stays fixed and sun/moon rotates
     private float[] getSunXY(float cx, float cy, float radius) {
         double relAz = getRelativeAzimuth();
         float canvasAngle = (float) Math.toRadians(relAz - 90);
-        float dist = (float) (radius * 0.82f * (1.0 - Math.max(0, sunElevation) / 90.0));
+        float dist = (float) (radius * 0.82f * (1.0 - Math.max(0, activeElevation()) / 90.0));
         dist = Math.min(dist, radius * 0.82f);
         return new float[]{
                 cx + (float) Math.cos(canvasAngle) * dist,

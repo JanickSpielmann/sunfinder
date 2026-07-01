@@ -29,7 +29,8 @@
       "Bash(rmdir app/src/main/res/drawable)",
       "Bash('/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/java.exe' 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\MonoGen.java')",
       "Bash('/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/java.exe' 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\SunGlyph.java')",
-      "Bash(JAVA_HOME=\"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\" ./gradlew.bat assembleDebug lintDebug --console=plain)"
+      "Bash(JAVA_HOME=\"C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Programs\\\\Android Studio\\\\jbr\" ./gradlew.bat assembleDebug lintDebug --console=plain)",
+      "Bash('/c/Users/Janick/AppData/Local/Programs/Android Studio/jbr/bin/java.exe' 'C:\\\\Users\\\\Janick\\\\AppData\\\\Local\\\\Temp\\\\claude\\\\P--SunFinder\\\\748d0c75-99b8-47c9-b996-efea44641d4e\\\\scratchpad\\\\MoonPreview.java')"
     ]
   }
 }

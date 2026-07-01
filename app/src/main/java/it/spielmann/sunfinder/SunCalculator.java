@@ -54,22 +54,6 @@ public class SunCalculator {
         double decRad = Math.toRadians(dec);
         double HArad = Math.toRadians(HA);
 
-        double cosZenith = clamp(
-                Math.sin(latRad) * Math.sin(decRad) + Math.cos(latRad) * Math.cos(decRad) * Math.cos(HArad));
-        double zenith = Math.toDegrees(Math.acos(cosZenith));
-        double elevation = 90 - zenith;
-
-        // atan2-based azimuth: no acos quadrant ambiguity, no HA-flip needed
-        double eastComponent  = -Math.sin(HArad) * Math.cos(decRad);
-        double northComponent =  Math.cos(latRad) * Math.sin(decRad)
-                               - Math.sin(latRad) * Math.cos(decRad) * Math.cos(HArad);
-        double azimuth = Math.toDegrees(Math.atan2(eastComponent, northComponent));
-        if (azimuth < 0) azimuth += 360;
-
-        return new double[]{azimuth, elevation};
-    }
-
-    private static double clamp(double v) {
-        return Math.max(-1.0, Math.min(1.0, v));
+        return AstroMath.horizontal(latRad, decRad, HArad);
     }
 }

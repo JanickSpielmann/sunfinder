@@ -2,6 +2,7 @@ package it.spielmann.sunfinder;
 
 import android.Manifest;
 import java.util.Locale;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -15,12 +16,17 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.SystemClock;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.view.ViewCompat;
+import androidx.core.view.WindowCompat;
+import androidx.core.view.WindowInsetsCompat;
 
 public class MainActivity extends AppCompatActivity implements SensorEventListener {
 
@@ -43,6 +49,9 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     private double currentSunAzimuth = 0;
     private double currentSunElevation = 0;
 
+    private double currentMoonAzimuth = 0;
+    private double currentMoonIlluminatedFraction = 0;
+
     private final Handler handler = new Handler(Looper.getMainLooper());
     private Runnable sunUpdateRunnable;
     private long lastUiUpdate = 0;
@@ -59,12 +68,19 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        WindowCompat.setDecorFitsSystemWindows(getWindow(), false);
         setContentView(R.layout.activity_main);
 
         compassView = findViewById(R.id.compassView);
         tvRecommendation = findViewById(R.id.tvRecommendation);
         tvDetails = findViewById(R.id.tvDetails);
         tvStatus = findViewById(R.id.tvStatus);
+
+        ImageButton btnSettings = findViewById(R.id.btnSettings);
+        btnSettings.setOnClickListener(v -> startActivity(new Intent(this, SettingsActivity.class)));
+
+        applyTopInset(tvStatus, 12);
+        applyTopInset(btnSettings, 8);
 
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -80,6 +96,18 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         };
         handler.post(sunUpdateRunnable);
+    }
+
+    // Adds the real status-bar height (varies per device) on top of a fixed visual base margin
+    private void applyTopInset(View view, int baseMarginDp) {
+        int baseMarginPx = (int) (baseMarginDp * getResources().getDisplayMetrics().density);
+        ViewCompat.setOnApplyWindowInsetsListener(view, (v, insets) -> {
+            int topInset = insets.getInsets(WindowInsetsCompat.Type.systemBars()).top;
+            ViewGroup.MarginLayoutParams params = (ViewGroup.MarginLayoutParams) v.getLayoutParams();
+            params.topMargin = topInset + baseMarginPx;
+            v.setLayoutParams(params);
+            return insets;
+        });
     }
 
     private void requestLocationPermission() {
@@ -125,26 +153,36 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
     };
 
     private void recalculateSun() {
-        double[] pos = SunCalculator.calculate(lat, lon, System.currentTimeMillis());
-        currentSunAzimuth = pos[0];
-        currentSunElevation = pos[1];
+        long now = System.currentTimeMillis();
+
+        double[] sunPos = SunCalculator.calculate(lat, lon, now);
+        currentSunAzimuth = sunPos[0];
+        currentSunElevation = sunPos[1];
         compassView.setSunPosition(currentSunAzimuth, currentSunElevation);
+
+        double[] moonPos = MoonCalculator.calculate(lat, lon, now);
+        currentMoonAzimuth = moonPos[0];
+        currentMoonIlluminatedFraction = moonPos[2];
+        compassView.setMoonPosition(moonPos[0], moonPos[1], moonPos[2], moonPos[3]);
+
         updateUi();
     }
 
     private void updateUi() {
         SunCompassView.ShadeSide side = compassView.getShadeSide();
-        String cardinal = azimuthToCardinal(currentSunAzimuth);
+        boolean night = currentSunElevation <= 0;
 
-        if (currentSunElevation <= 0) {
-            tvRecommendation.setText(R.string.rec_sunset);
+        if (night) {
+            tvRecommendation.setText("");
         } else {
-            switch (side) {
+            boolean preferShade = Prefs.isPreferShade(this);
+            SunCompassView.ShadeSide recommended = preferShade ? side : opposite(side);
+            switch (recommended) {
                 case LEFT:
-                    tvRecommendation.setText(R.string.rec_left);
+                    tvRecommendation.setText(preferShade ? R.string.rec_left : R.string.rec_left_sun);
                     break;
                 case RIGHT:
-                    tvRecommendation.setText(R.string.rec_right);
+                    tvRecommendation.setText(preferShade ? R.string.rec_right : R.string.rec_right_sun);
                     break;
                 default:
                     tvRecommendation.setText(R.string.rec_front_back);
@@ -152,14 +190,26 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
             }
         }
 
-        if (!hasLocation) {
+        int detailsRes = night
+                ? (hasLocation ? R.string.details_moon_with_location : R.string.details_moon_default_location)
+                : (hasLocation ? R.string.details_with_location : R.string.details_default_location);
+
+        if (night) {
+            String cardinal = azimuthToCardinal(currentMoonAzimuth);
             tvDetails.setText(String.format(Locale.getDefault(),
-                    getString(R.string.details_default_location),
-                    cardinal, currentSunAzimuth, currentSunElevation));
+                    getString(detailsRes), cardinal, currentMoonAzimuth, currentMoonIlluminatedFraction * 100));
         } else {
+            String cardinal = azimuthToCardinal(currentSunAzimuth);
             tvDetails.setText(String.format(Locale.getDefault(),
-                    getString(R.string.details_with_location),
-                    cardinal, currentSunAzimuth, currentSunElevation));
+                    getString(detailsRes), cardinal, currentSunAzimuth, currentSunElevation));
+        }
+    }
+
+    private SunCompassView.ShadeSide opposite(SunCompassView.ShadeSide side) {
+        switch (side) {
+            case LEFT: return SunCompassView.ShadeSide.RIGHT;
+            case RIGHT: return SunCompassView.ShadeSide.LEFT;
+            default: return SunCompassView.ShadeSide.NEITHER;
         }
     }
 
@@ -178,6 +228,7 @@ public class MainActivity extends AppCompatActivity implements SensorEventListen
         if (magnetometer != null) {
             sensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_UI);
         }
+        updateUi(); // preference may have changed in SettingsActivity
     }
 
     @Override
